@@ -60,6 +60,38 @@ public:
     static void schimbareCost(int costNou) {
         cost = costNou;
     }
+
+    SANTIER& operator=(const SANTIER& s) {
+        if (this == &s) {
+            return *this;
+        }
+
+        suprafata = s.suprafata;
+        zona = s.zona;
+
+        delete[] numeUtilaj;
+        numeUtilaj = new char[strlen(s.numeUtilaj) + 1];
+        strcpy_s(numeUtilaj, strlen(s.numeUtilaj) + 1, s.numeUtilaj);
+
+        return *this;
+    }
+
+    
+    bool operator==(const SANTIER& s) const {
+        return (anulInceperii == s.anulInceperii && suprafata == s.suprafata && zona == s.zona && strcmp(numeUtilaj, s.numeUtilaj) == 0);
+    }
+
+    
+    bool operator!=(const SANTIER& s) const {
+        return !(*this == s);
+    }
+
+    
+    SANTIER operator+(const SANTIER& s) const {
+        SANTIER sumaSantier = *this;
+        sumaSantier.suprafata += s.suprafata;
+        return sumaSantier;
+    }
 };
 
 int SANTIER::cost = 100000;
@@ -141,6 +173,51 @@ public:
     static void marireSalariuInceput(float marire) {
         salariuInceput += marire;
     }
+
+
+    Muncitori& operator=(const Muncitori& m) {
+        if (this == &m) {
+            return *this;
+        }
+
+        nrAngajati = m.nrAngajati;
+        delete[] varste;
+        varste = new int[nrAngajati];
+
+        for (int i = 0; i < nrAngajati; i++) {
+            varste[i] = m.varste[i];
+        }
+
+        return *this;
+    }
+
+   
+    bool operator==(const Muncitori& m) const {
+        if (profesie != m.profesie || nrAngajati != m.nrAngajati) {
+            return false;
+        }
+
+        for (int i = 0; i < nrAngajati; i++) {
+            if (varste[i] != m.varste[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+   
+    bool operator!=(const Muncitori& m) const {
+        return !(*this == m);
+    }
+
+    
+    int operator[](int index) {
+        if (index >= 0 && index < nrAngajati) {
+            return varste[index];
+        }
+        return -1; 
+    }
 };
 
 float Muncitori::salariuInceput = 3000;
@@ -154,6 +231,7 @@ private:
     string* marca;
 
 public:
+
     Utilaje() : tipCombustibil("Motorina") {
         this->nrUtilaje = 2;
         this->nume = "Buldozer";
@@ -227,15 +305,75 @@ public:
     static int returnareAn() {
         return anMinimFabricatie;
     }
+
+    
+    Utilaje& operator=(const Utilaje& u) {
+        if (this == &u) {
+            return *this;
+        }
+
+        nrUtilaje = u.nrUtilaje;
+        nume = u.nume;
+
+        delete[] marca;
+        marca = new string[nrUtilaje];
+
+        for (int i = 0; i < nrUtilaje; i++) {
+            marca[i] = u.marca[i];
+        }
+
+        return *this;
+    }
+
+    
+    bool operator==(const Utilaje& u) const {
+        if (tipCombustibil != u.tipCombustibil || nrUtilaje != u.nrUtilaje || nume != u.nume) {
+            return false;
+        }
+
+        for (int i = 0; i < nrUtilaje; i++) {
+            if (marca[i] != u.marca[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    
+    bool operator!=(const Utilaje& u) const {
+        return !(*this == u);
+    }
+
+    
+    Utilaje operator+(const Utilaje& u) const {
+        Utilaje sumaUtilaje = *this;
+        sumaUtilaje.nrUtilaje += u.nrUtilaje;
+        sumaUtilaje.nume += " si " + u.nume;
+        string* newMarca = new string[sumaUtilaje.nrUtilaje];
+
+        for (int i = 0; i < nrUtilaje; i++) {
+            newMarca[i] = sumaUtilaje.marca[i];
+        }
+
+        for (int i = nrUtilaje; i < sumaUtilaje.nrUtilaje; i++) {
+            newMarca[i] = u.marca[i - nrUtilaje];
+        }
+
+        delete[] sumaUtilaje.marca;
+        sumaUtilaje.marca = newMarca;
+        return sumaUtilaje;
+    }
 };
 
 int Utilaje::anMinimFabricatie = 2003;
 
-// Funcție globală prietenă pentru clasa Muncitori
+
 void AfiseazaMuncitoriSubVarsta(Muncitori& muncitori, int limitaVarsta) {
     cout << "Muncitorii cu varsta sub " << limitaVarsta << " ani sunt: ";
     int* varste = muncitori.getVarste();
     int nrAngajati = muncitori.getNrAngajati();
+
     if (varste != NULL) {
         for (int i = 0; i < nrAngajati; i++) {
             if (varste[i] < limitaVarsta) {
@@ -243,15 +381,16 @@ void AfiseazaMuncitoriSubVarsta(Muncitori& muncitori, int limitaVarsta) {
             }
         }
     }
+
     cout << endl;
 }
 
-// Funcție globală prietenă pentru clasa Utilaje
+
 void AdaugaMarcaUtilaj(Utilaje& utilaje, const string& marcaNoua) {
     int nrUtilaje = utilaje.getNrUtilaje();
     string* marci = utilaje.getMarca();
 
-    // Crearea unei noi liste de mărci cu o marcă în plus
+    
     string* marciNoi = new string[nrUtilaje + 1];
     for (int i = 0; i < nrUtilaje; i++) {
         marciNoi[i] = marci[i];
@@ -261,7 +400,6 @@ void AdaugaMarcaUtilaj(Utilaje& utilaje, const string& marcaNoua) {
     utilaje.setMarca(marciNoi, nrUtilaje + 1);
     cout << "Marca " << marcaNoua << " a fost adaugata la lista de marci a utilajului.\n";
 }
-
 
 int main() {
     SANTIER santier1;
@@ -287,7 +425,7 @@ int main() {
     Muncitori muncitori3("Asistentele");
     muncitori3.afisare();
 
-    AfiseazaMuncitoriSubVarsta(muncitori1, 45);
+    AfiseazaMuncitoriSubVarsta(muncitori1, 45); 
 
     Utilaje utilaje1;
     utilaje1.afisare();
@@ -299,6 +437,72 @@ int main() {
     Utilaje utilaje3("Motocultor");
     utilaje3.afisare();
 
-    AdaugaMarcaUtilaj(utilaje2, "CAT");
+    AdaugaMarcaUtilaj(utilaje2, "CAT"); 
+
+    SANTIER santier4;
+    SANTIER santier5;
+    SANTIER santier6;
+
+    santier6 = santier4 + santier5;
+    santier6.afisare();
+
+    if (santier1 == santier2) {
+        cout << "Santier1 este egal cu Santier2.\n";
+    }
+    else {
+        cout << "Santier1 nu este egal cu Santier2.\n";
+    }
+
+    if (santier1 != santier3) {
+        cout << "Santier1 este diferit de Santier3.\n";
+    }
+    else {
+        cout << "Santier1 nu este diferit de Santier3.\n";
+    }
+
+    Muncitori muncitori4;
+    Muncitori muncitori5;
+
+    muncitori4 = muncitori2;
+    muncitori4.afisare();
+
+    if (muncitori4 == muncitori5) {
+        cout << "Muncitori4 este egal cu Muncitori5.\n";
+    }
+    else {
+        cout << "Muncitori4 nu este egal cu Muncitori5.\n";
+    }
+
+    if (muncitori2 != muncitori3) {
+        cout << "Muncitori2 este diferit de Muncitori3.\n";
+    }
+    else {
+        cout << "Muncitori2 nu este diferit de Muncitori3.\n";
+    }
+
+    int varstaMuncitor2 = muncitori2[0];
+    cout << "Varsta primului muncitor din Muncitori2 este: " << varstaMuncitor2 << " ani.\n";
+
+    Utilaje utilaje4;
+    Utilaje utilaje5;
+    Utilaje utilaje6;
+
+    utilaje6 = utilaje4 + utilaje5;
+    utilaje6.afisare();
+
+    if (utilaje1 == utilaje2) {
+        cout << "Utilaje1 este egal cu Utilaje2.\n";
+    }
+    else {
+        cout << "Utilaje1 nu este egal cu Utilaje2.\n";
+    }
+
+    if (utilaje1 != utilaje3) {
+        cout << "Utilaje1 este diferit de Utilaje3.\n";
+    }
+    else {
+        cout << "Utilaje1 nu este diferit de Utilaje3.\n";
+    }
+
     return 0;
 }
