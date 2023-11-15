@@ -46,10 +46,7 @@ public:
         strcpy_s(this->numeUtilaj, strlen(numeUtilaj) + 1, numeUtilaj);
     }
 
-    void afisare() {
-        cout << "Santierul cu un cost de " << cost << " euro, inceput in anul " << anulInceperii << " ,are o suprafata de " << suprafata
-            << " metri patrati, in zona " << zona << " unde utilajul cel mai folosit este " << numeUtilaj << ".\n";
-    }
+    friend ostream& operator<<(ostream& os, const SANTIER& santier);
 
     ~SANTIER() {
         if (numeUtilaj != NULL) {
@@ -76,17 +73,17 @@ public:
         return *this;
     }
 
-    
+
     bool operator==(const SANTIER& s) const {
         return (anulInceperii == s.anulInceperii && suprafata == s.suprafata && zona == s.zona && strcmp(numeUtilaj, s.numeUtilaj) == 0);
     }
 
-    
+
     bool operator!=(const SANTIER& s) const {
         return !(*this == s);
     }
 
-    
+
     SANTIER operator+(const SANTIER& s) const {
         SANTIER sumaSantier = *this;
         sumaSantier.suprafata += s.suprafata;
@@ -153,18 +150,7 @@ public:
         }
     }
 
-    void afisare() {
-        cout << profesie << " au un salariu de inceput de " << salariuInceput << ". Ei sunt in numar de " << nrAngajati << " cu varste de ";
-        if (nrAngajati != 0 && varste != NULL) {
-            for (int i = 0; i < nrAngajati; i++) {
-                cout << varste[i] << " ";
-            }
-        }
-        else {
-            cout << "-";
-        }
-        cout << endl;
-    }
+    friend ostream& operator<<(ostream& os, const Muncitori& muncitori);
 
     ~Muncitori() {
         delete[] varste;
@@ -191,7 +177,7 @@ public:
         return *this;
     }
 
-   
+
     bool operator==(const Muncitori& m) const {
         if (profesie != m.profesie || nrAngajati != m.nrAngajati) {
             return false;
@@ -206,18 +192,20 @@ public:
         return true;
     }
 
-   
+
     bool operator!=(const Muncitori& m) const {
         return !(*this == m);
     }
 
-    
+
     int operator[](int index) {
         if (index >= 0 && index < nrAngajati) {
             return varste[index];
         }
-        return -1; 
+        return -1;
     }
+
+    friend void AfiseazaMuncitoriSubVarsta(Muncitori& muncitori, int limitaVarsta);
 };
 
 float Muncitori::salariuInceput = 3000;
@@ -284,19 +272,7 @@ public:
         nrUtilaje = nrMarci;
     }
 
-    void afisare() {
-        cout << "Fiind dat anul minim al utilajelor de " << anMinimFabricatie << " ,utilajul " << nume << " consuma "
-            << tipCombustibil << " ,este in numar de " << nrUtilaje << " avand marcile : ";
-        if (nrUtilaje != 0 && marca != NULL) {
-            for (int i = 0; i < nrUtilaje; i++) {
-                cout << marca[i] << " ";
-            }
-        }
-        else {
-            cout << "-";
-        }
-        cout << endl;
-    }
+    friend ostream& operator<<(ostream& os, const Utilaje& utilaje);;
 
     ~Utilaje() {
         delete[] marca;
@@ -306,7 +282,7 @@ public:
         return anMinimFabricatie;
     }
 
-    
+
     Utilaje& operator=(const Utilaje& u) {
         if (this == &u) {
             return *this;
@@ -325,7 +301,7 @@ public:
         return *this;
     }
 
-    
+
     bool operator==(const Utilaje& u) const {
         if (tipCombustibil != u.tipCombustibil || nrUtilaje != u.nrUtilaje || nume != u.nume) {
             return false;
@@ -340,12 +316,12 @@ public:
         return true;
     }
 
-    
+
     bool operator!=(const Utilaje& u) const {
         return !(*this == u);
     }
 
-    
+
     Utilaje operator+(const Utilaje& u) const {
         Utilaje sumaUtilaje = *this;
         sumaUtilaje.nrUtilaje += u.nrUtilaje;
@@ -364,6 +340,9 @@ public:
         sumaUtilaje.marca = newMarca;
         return sumaUtilaje;
     }
+
+    friend void AdaugaMarcaUtilaj(Utilaje& utilaje, const string& marcaNoua);
+
 };
 
 int Utilaje::anMinimFabricatie = 2003;
@@ -390,7 +369,7 @@ void AdaugaMarcaUtilaj(Utilaje& utilaje, const string& marcaNoua) {
     int nrUtilaje = utilaje.getNrUtilaje();
     string* marci = utilaje.getMarca();
 
-    
+
     string* marciNoi = new string[nrUtilaje + 1];
     for (int i = 0; i < nrUtilaje; i++) {
         marciNoi[i] = marci[i];
@@ -401,108 +380,90 @@ void AdaugaMarcaUtilaj(Utilaje& utilaje, const string& marcaNoua) {
     cout << "Marca " << marcaNoua << " a fost adaugata la lista de marci a utilajului.\n";
 }
 
-int main() {
-    SANTIER santier1;
-    santier1.afisare();
+ostream& operator<<(ostream& os, const SANTIER& santier) {
+    os << "Anul Inceperii: " << santier.getAnulInceperii() << "\n";
+    os << "Suprafata: " << santier.getSuprafata() << "\n";
+    os << "Zona: " << santier.getZona() << "\n";
+    os << "Nume Utilaj: " << santier.getNumeUtilaj() << "\n";
+    return os;
+}
 
+ostream& operator<<(ostream& os, const Muncitori& muncitori) {
+    os << "Profesie: " << muncitori.getProfesie() << "\n";
+    os << "Nr. Angajati: " << muncitori.getNrAngajati() << "\n";
+    os << "Varste: ";
+    int* varste = muncitori.getVarste();
+    for (int i = 0; i < muncitori.getNrAngajati(); ++i) {
+        os << varste[i] << " ";
+    }
+    os << "\n";
+    return os;
+}
+
+ostream& operator<<(ostream& os, const Utilaje& utilaje) {
+    os << "Tip Combustibil: " << utilaje.getTipCombustibil() << "\n";
+    os << "Nr. Utilaje: " << utilaje.getNrUtilaje() << "\n";
+    os << "Nume: " << utilaje.getNume() << "\n";
+    os << "Marci: ";
+    string* marci = utilaje.getMarca();
+    for (int i = 0; i < utilaje.getNrUtilaje(); ++i) {
+        os << marci[i] << " ";
+    }
+    os << "\n";
+    return os;
+}
+
+void main() {
+    SANTIER santier1;
     char* numeUtilaj = new char[strlen("Excavator") + 1];
     strcpy_s(numeUtilaj, strlen("Excavator") + 1, "Excavator");
-    SANTIER santier2(2015, 901.7, "Baia Mare", numeUtilaj);
-    SANTIER::schimbareCost(12000);
-    santier2.afisare();
+    SANTIER santier2(2015, 1200, "Constanta", numeUtilaj);
+    SANTIER santier3(2018, 900);
+    SANTIER santier4 = santier1;
 
-    SANTIER santier3(2008, 498.6);
-    santier3.afisare();
+    cout << "Anul Inceperii santier1: " << santier1.getAnulInceperii() << endl;
+    cout << "Suprafata santier2: " << santier2.getSuprafata() << endl;
+    cout << "Zona santier3: " << santier3.getZona() << endl;
+    cout << "Nume Utilaj santier4: " << santier4.getNumeUtilaj() << endl;
 
+    santier1.setSuprafata(1000);
+    santier2.setZona("Bucuresti");
+    santier3.setNumeUtilaj("Macara");
+
+    cout << "Santier 1:\n" << santier1 << endl;
+    cout << "Santier 2:\n" << santier2 << endl;
+    cout << "Santier 3:\n" << santier3 << endl;
+
+    SANTIER santierSuma = santier1 + santier2;
+    cout << "Suma Suprafetelor: " << santierSuma.getSuprafata() << endl;
+
+    int* varsteMuncitori = new int[3]; 
+    varsteMuncitori[0] = 28;
+    varsteMuncitori[1] = 35;
+    varsteMuncitori[2] = 42;
     Muncitori muncitori1;
-    muncitori1.afisare();
+    Muncitori muncitori2("Constructori", 4, varsteMuncitori);
+    Muncitori muncitori3("Sudori");
 
-    int varste[2] = { 50, 48 };
-    Muncitori muncitori2("Manegerii", 2, varste);
-    Muncitori::marireSalariuInceput(500);
-    muncitori2.afisare();
+    cout << "Muncitori 1:\n" << muncitori1 << endl;
+    cout << "Muncitori 2:\n" << muncitori2 << endl;
+    cout << "Muncitori 3:\n" << muncitori3 << endl;
 
-    Muncitori muncitori3("Asistentele");
-    muncitori3.afisare();
+    muncitori3 = muncitori2;
+    cout << "Nr. Angajati Muncitori 3: " << muncitori3.getNrAngajati() << endl;
 
-    AfiseazaMuncitoriSubVarsta(muncitori1, 45); 
-
+    string* marciUtilaje = new string[2]; 
+    marciUtilaje[0] = "Liebherr";
+    marciUtilaje[1] = "Volvo";
     Utilaje utilaje1;
-    utilaje1.afisare();
+    Utilaje utilaje2("Motorina", 2, "Buldozer", marciUtilaje);
+    Utilaje utilaje3("Excavator");
 
-    string marca[3] = { "Hitachi", "Volvo", "Hyundai" };
-    Utilaje utilaje2("Motorina", 3, "Excavator", marca);
-    utilaje2.afisare();
+    cout << "Utilaje 1:\n" << utilaje1 << endl;
+    cout << "Utilaje 2:\n" << utilaje2 << endl;
+    cout << "Utilaje 3:\n" << utilaje3 << endl;
 
-    Utilaje utilaje3("Motocultor");
-    utilaje3.afisare();
+    AdaugaMarcaUtilaj(utilaje1, "Caterpillar");
+    cout << "Utilaje 1 dupa adaugare marca:\n" << utilaje1 << endl;
 
-    AdaugaMarcaUtilaj(utilaje2, "CAT"); 
-
-    SANTIER santier4;
-    SANTIER santier5;
-    SANTIER santier6;
-
-    santier6 = santier4 + santier5;
-    santier6.afisare();
-
-    if (santier1 == santier2) {
-        cout << "Santier1 este egal cu Santier2.\n";
-    }
-    else {
-        cout << "Santier1 nu este egal cu Santier2.\n";
-    }
-
-    if (santier1 != santier3) {
-        cout << "Santier1 este diferit de Santier3.\n";
-    }
-    else {
-        cout << "Santier1 nu este diferit de Santier3.\n";
-    }
-
-    Muncitori muncitori4;
-    Muncitori muncitori5;
-
-    muncitori4 = muncitori2;
-    muncitori4.afisare();
-
-    if (muncitori4 == muncitori5) {
-        cout << "Muncitori4 este egal cu Muncitori5.\n";
-    }
-    else {
-        cout << "Muncitori4 nu este egal cu Muncitori5.\n";
-    }
-
-    if (muncitori2 != muncitori3) {
-        cout << "Muncitori2 este diferit de Muncitori3.\n";
-    }
-    else {
-        cout << "Muncitori2 nu este diferit de Muncitori3.\n";
-    }
-
-    int varstaMuncitor2 = muncitori2[0];
-    cout << "Varsta primului muncitor din Muncitori2 este: " << varstaMuncitor2 << " ani.\n";
-
-    Utilaje utilaje4;
-    Utilaje utilaje5;
-    Utilaje utilaje6;
-
-    utilaje6 = utilaje4 + utilaje5;
-    utilaje6.afisare();
-
-    if (utilaje1 == utilaje2) {
-        cout << "Utilaje1 este egal cu Utilaje2.\n";
-    }
-    else {
-        cout << "Utilaje1 nu este egal cu Utilaje2.\n";
-    }
-
-    if (utilaje1 != utilaje3) {
-        cout << "Utilaje1 este diferit de Utilaje3.\n";
-    }
-    else {
-        cout << "Utilaje1 nu este diferit de Utilaje3.\n";
-    }
-
-    return 0;
 }
