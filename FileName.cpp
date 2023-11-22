@@ -48,6 +48,23 @@ public:
 
     friend ostream& operator<<(ostream& os, const SANTIER& santier);
 
+    friend istream& operator>>(istream& is, SANTIER& santier) {
+  
+        cout << "Introduceti suprafata: ";
+        is >> santier.suprafata;
+        cout << "Introduceti zona: ";
+        is >> santier.zona;
+        if (santier.numeUtilaj != NULL) {
+            delete[]santier.numeUtilaj;
+        }
+        cout << "Introduceti numele utilajului: ";
+        santier.numeUtilaj = new char[100];
+        is >> santier.numeUtilaj;
+        
+
+        return is;
+    }
+
     ~SANTIER() {
         if (numeUtilaj != NULL) {
             delete[] numeUtilaj;
@@ -151,6 +168,25 @@ public:
     }
 
     friend ostream& operator<<(ostream& os, const Muncitori& muncitori);
+
+    friend istream& operator>>(istream& is, Muncitori& muncitori) {
+       
+        cout << "Introduceti numarul de angajati: ";
+        is >> muncitori.nrAngajati;
+        if (muncitori.varste != NULL) {
+            delete[]muncitori.varste;
+        }
+        if (muncitori.nrAngajati > 0) {
+            muncitori.varste = new int[muncitori.nrAngajati];
+            cout << "Introduceti varstele angajatilor: ";
+            for (int i = 0; i < muncitori.nrAngajati; i++) {
+                is >> muncitori.varste[i];
+            }
+        }
+
+
+        return is;
+    }
 
     ~Muncitori() {
         delete[] varste;
@@ -272,7 +308,25 @@ public:
         nrUtilaje = nrMarci;
     }
 
-    friend ostream& operator<<(ostream& os, const Utilaje& utilaje);;
+    friend ostream& operator<<(ostream& os, const Utilaje& utilaje);
+
+    friend istream& operator>>(istream& is, Utilaje& utilaje) {
+        cout << "Introduceti numarul de utilaje: ";
+        is >> utilaje.nrUtilaje;
+        if (utilaje.marca != NULL) {
+            delete[]utilaje.marca;
+        }
+        if (utilaje.nrUtilaje > 0) {
+            utilaje.marca = new string[utilaje.nrUtilaje];
+            cout << "Introduceti marcile utilajelor: ";
+            for (int i = 0; i < utilaje.nrUtilaje; i++) {
+                is >> utilaje.marca[i];
+            }
+        }
+
+
+        return is;
+    }
 
     ~Utilaje() {
         delete[] marca;
@@ -465,5 +519,54 @@ void main() {
 
     AdaugaMarcaUtilaj(utilaje1, "Caterpillar");
     cout << "Utilaje 1 dupa adaugare marca:\n" << utilaje1 << endl;
+
+    SANTIER* vectorSantier=new SANTIER[2];
+    for (int i = 0; i < 2; i++) {
+        cout << "Introduceti datele pentru santier " << ":\n";
+        cin >> vectorSantier[i];
+    }
+
+    for (int i = 0; i < 2; i++) {
+        cout << "Obiectele citite din vector sunt:\n";
+        cout << vectorSantier[i] << "\n";
+    }
+
+    Muncitori* vectorMuncitori = new Muncitori[2];
+    for (int i = 0; i < 2; i++) {
+        cout << "Introduceti datele pentru muncitori " << ":\n";
+        cin >> vectorMuncitori[i];
+    }
+
+    for (int i = 0; i < 2; i++) {
+        cout << "Obiectele citite din vector sunt:\n";
+        cout << vectorMuncitori[i] << "\n";
+    }
+
+    Utilaje* vectorUtilaje = new Utilaje[2];
+    for (int i = 0; i < 2; i++) {
+        cout << "Introduceti datele pentru utilaje " << ":\n";
+        cin >> vectorUtilaje[i];
+    }
+
+    for (int i = 0; i < 2; i++) {
+        cout << "Obiectele citite din vector sunt:\n";
+        cout << vectorUtilaje[i] << "\n";
+    }
+
+    const int numarSantiere = 2;
+    const int numarObiectePerSantier = 2;
+    SANTIER matriceSantiere[numarSantiere][numarObiectePerSantier];
+    for (int i = 0; i < numarSantiere; i++) {
+        for (int j = 0; j < numarObiectePerSantier; j++) {
+            cout << "Introduceti datele pentru santierul " << i + 1 << ", obiectul " << j + 1 << ":\n";
+            cin >> matriceSantiere[i][j];
+        }
+    }
+    cout << "Obiectele citite din matrice sunt:\n";
+    for (int i = 0; i < numarSantiere; i++) {
+        for (int j = 0; j < numarObiectePerSantier; j++) {
+            cout << matriceSantiere[i][j] << "\n";
+        }
+    }
 
 }
