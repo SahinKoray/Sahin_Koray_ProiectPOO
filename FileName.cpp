@@ -402,6 +402,7 @@ public:
 int Utilaje::anMinimFabricatie = 2003;
 
 
+
 void AfiseazaMuncitoriSubVarsta(Muncitori& muncitori, int limitaVarsta) {
     cout << "Muncitorii cu varsta sub " << limitaVarsta << " ani sunt: ";
     int* varste = muncitori.getVarste();
@@ -465,6 +466,71 @@ ostream& operator<<(ostream& os, const Utilaje& utilaje) {
     }
     os << "\n";
     return os;
+}
+
+class Echipament {
+private:
+    int anFabricatie;
+    Utilaje* utilaj;  
+    float costAchizitie;
+    bool functional;
+
+public:
+    Echipament() : anFabricatie(2020), costAchizitie(50000.0), functional(true), utilaj(new Utilaje()) {
+       
+    }
+
+    Echipament(int anFabricatie, const Utilaje& utilaj, float costAchizitie, bool functional) : anFabricatie(anFabricatie), costAchizitie(costAchizitie), functional(functional), utilaj(new Utilaje(utilaj)) {
+    
+    }
+
+    int getAnFabricatie() const { return anFabricatie; }
+    Utilaje* getUtilaj() const { return utilaj; }
+    float getCostAchizitie() const { return costAchizitie; }
+    bool isFunctional() const { return functional; }
+
+    void setAnFabricatie(int anFabricatie) { this->anFabricatie = anFabricatie; }
+    void setUtilaj(const Utilaje& utilaj) { *(this->utilaj) = utilaj; }
+    void setCostAchizitie(float costAchizitie) { this->costAchizitie = costAchizitie; }
+    void setFunctional(bool functional) { this->functional = functional; }
+
+
+    friend ostream& operator<<(ostream& os, const Echipament& echipament);
+    Echipament& operator=(const Echipament& echipament);
+    bool operator==(const Echipament& echipament) const;
+
+    ~Echipament() {
+        delete utilaj;  
+    }
+};
+
+
+ostream& operator<<(ostream& os, const Echipament& echipament) {
+    os << "An Fabricatie: " << echipament.getAnFabricatie() << "\n";
+    os << "Utilaj:\n" << *(echipament.getUtilaj());
+    os << "Cost Achizitie: " << echipament.getCostAchizitie() << "\n";
+    os << "Functional: " << (echipament.isFunctional() ? "Da" : "Nu") << "\n";
+    return os;
+}
+
+Echipament& Echipament::operator=(const Echipament& echipament) {
+    if (this == &echipament) {
+        return *this;
+    }
+
+    anFabricatie = echipament.anFabricatie;
+    *(utilaj) = *(echipament.utilaj);
+    costAchizitie = echipament.costAchizitie;
+    functional = echipament.functional;
+
+    return *this;
+}
+
+bool Echipament::operator==(const Echipament& echipament) const {
+    return (anFabricatie == echipament.anFabricatie &&
+        *(utilaj) == *(echipament.utilaj) &&
+        costAchizitie == echipament.costAchizitie &&
+        functional == echipament.functional);
 }
 
 void main() {
@@ -567,6 +633,24 @@ void main() {
         for (int j = 0; j < numarObiectePerSantier; j++) {
             cout << matriceSantiere[i][j] << "\n";
         }
+    }
+
+    Utilaje utilaje4("Motorina", 1, "Buldozer", new string[1]{ "CAT" });
+
+    Echipament echipament1;
+    Echipament echipament2(2018, utilaje4, 75000.0, true);
+
+    cout << "ECHIPAMENT 1:\n" << echipament1 << "\n";
+    cout << "ECHIPAMENT 2:\n" << echipament2 << "\n";
+
+    echipament1 = echipament2;
+    cout << "Dupa atribuire, ECHIPAMENT 1:\n" << echipament1 << "\n";
+
+    if (echipament1 == echipament2) {
+        cout << "ECHIPAMENT 1 si ECHIPAMENT 2 sunt identice.\n";
+    }
+    else {
+        cout << "ECHIPAMENT 1 si ECHIPAMENT 2 nu sunt identice.\n";
     }
 
 }
