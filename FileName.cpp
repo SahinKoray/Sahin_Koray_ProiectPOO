@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 using namespace std;
 
 class SANTIER {
@@ -48,8 +49,8 @@ public:
 
     friend ostream& operator<<(ostream& os, const SANTIER& santier);
 
-    friend istream& operator>>(istream& is, SANTIER& santier) {
-  
+    /*friend istream& operator>>(istream& is, SANTIER& santier) {
+
         cout << "Introduceti suprafata: ";
         is >> santier.suprafata;
         cout << "Introduceti zona: ";
@@ -60,9 +61,24 @@ public:
         cout << "Introduceti numele utilajului: ";
         santier.numeUtilaj = new char[100];
         is >> santier.numeUtilaj;
-        
+
 
         return is;
+    }*/
+
+    friend istream& operator>>(istream& fisier, SANTIER& santier) {
+        int a,b;
+        fisier >> a;
+        fisier >> b;
+        fisier >> santier.suprafata;
+        fisier >> santier.zona;
+        if (santier.numeUtilaj != NULL) {
+            delete[]santier.numeUtilaj;
+        }
+        santier.numeUtilaj = new char[100];
+        fisier >> santier.numeUtilaj;
+
+        return fisier;
     }
 
     ~SANTIER() {
@@ -106,6 +122,21 @@ public:
         sumaSantier.suprafata += s.suprafata;
         return sumaSantier;
     }
+
+
+    void scrieInFisierBinar(fstream& f) const {
+        f.write(reinterpret_cast<const char*>(&cost), sizeof(int));
+        f.write(reinterpret_cast<const char*>(&anulInceperii), sizeof(int));
+
+        int zonaSize = zona.size();
+        f.write(reinterpret_cast<const char*>(&zonaSize), sizeof(int));
+        f.write(zona.c_str(), zonaSize);
+
+        int numeUtilajSize = strlen(numeUtilaj) + 1;
+        f.write(reinterpret_cast<const char*>(&numeUtilajSize), sizeof(int));
+        f.write(numeUtilaj, numeUtilajSize);
+    }
+
 };
 
 int SANTIER::cost = 100000;
@@ -169,8 +200,8 @@ public:
 
     friend ostream& operator<<(ostream& os, const Muncitori& muncitori);
 
-    friend istream& operator>>(istream& is, Muncitori& muncitori) {
-       
+    /*friend istream& operator>>(istream& is, Muncitori& muncitori) {
+
         cout << "Introduceti numarul de angajati: ";
         is >> muncitori.nrAngajati;
         if (muncitori.varste != NULL) {
@@ -186,6 +217,22 @@ public:
 
 
         return is;
+    }*/
+
+    friend istream& operator>>(istream& fisier, Muncitori& muncitori) {
+        string a;
+        fisier >> a;
+        fisier >> muncitori.nrAngajati;
+        if (muncitori.varste != NULL) {
+            delete[]muncitori.varste;
+        }
+        if (muncitori.nrAngajati > 0) {
+            muncitori.varste = new int[muncitori.nrAngajati];
+            for (int i = 0; i < muncitori.nrAngajati; i++) {
+                fisier >> muncitori.varste[i];
+            }
+        }
+        return fisier;
     }
 
     ~Muncitori() {
@@ -242,6 +289,15 @@ public:
     }
 
     friend void AfiseazaMuncitoriSubVarsta(Muncitori& muncitori, int limitaVarsta);
+
+    void scrieInFisierBinar(fstream& f) const {
+        int profesieSize = profesie.size();
+        f.write(reinterpret_cast<const char*>(&profesieSize), sizeof(int));
+        f.write(profesie.c_str(), profesieSize);
+
+        f.write(reinterpret_cast<const char*>(&nrAngajati), sizeof(int));
+        f.write(reinterpret_cast<const char*>(varste), sizeof(int) * nrAngajati);
+    }
 };
 
 float Muncitori::salariuInceput = 3000;
@@ -310,7 +366,7 @@ public:
 
     friend ostream& operator<<(ostream& os, const Utilaje& utilaje);
 
-    friend istream& operator>>(istream& is, Utilaje& utilaje) {
+    /*friend istream& operator>>(istream& is, Utilaje& utilaje) {
         cout << "Introduceti numarul de utilaje: ";
         is >> utilaje.nrUtilaje;
         if (utilaje.marca != NULL) {
@@ -326,10 +382,32 @@ public:
 
 
         return is;
+    }*/
+
+    friend istream& operator>>(istream& fisier, Utilaje& utilaje) {
+        string a;
+        string b;
+        fisier >> a;
+        fisier >> utilaje.nrUtilaje;
+        fisier >> b;
+        if (utilaje.marca != NULL) {
+            delete[]utilaje.marca;
+        }
+        if (utilaje.nrUtilaje > 0) {
+            utilaje.marca = new string[utilaje.nrUtilaje];
+            for (int i = 0; i < utilaje.nrUtilaje; i++) {
+                fisier >> utilaje.marca[i];
+            }
+        }
+
+
+        return fisier;
     }
 
     ~Utilaje() {
-        delete[] marca;
+        if (marca != NULL) {
+            delete[] marca;
+        }
     }
 
     static int returnareAn() {
@@ -397,6 +475,24 @@ public:
 
     friend void AdaugaMarcaUtilaj(Utilaje& utilaje, const string& marcaNoua);
 
+    void scrieInFisierBinar(fstream& f) const {
+        int tipCombustibilSize = tipCombustibil.size();
+        f.write(reinterpret_cast<const char*>(&tipCombustibilSize), sizeof(int));
+        f.write(tipCombustibil.c_str(), tipCombustibilSize);
+
+        f.write(reinterpret_cast<const char*>(&anMinimFabricatie), sizeof(int));
+        f.write(reinterpret_cast<const char*>(&nrUtilaje), sizeof(int));
+
+        int numeSize = nume.size();
+        f.write(reinterpret_cast<const char*>(&numeSize), sizeof(int));
+        f.write(nume.c_str(), numeSize);
+
+        for (int i = 0; i < nrUtilaje; ++i) {
+            int marcaSize = marca[i].size();
+            f.write(reinterpret_cast<const char*>(&marcaSize), sizeof(int));
+            f.write(marca[i].c_str(), marcaSize);
+        }
+    }
 };
 
 int Utilaje::anMinimFabricatie = 2003;
@@ -436,52 +532,49 @@ void AdaugaMarcaUtilaj(Utilaje& utilaje, const string& marcaNoua) {
 }
 
 ostream& operator<<(ostream& os, const SANTIER& santier) {
-    os << "Anul Inceperii: " << santier.getAnulInceperii() << "\n";
-    os << "Suprafata: " << santier.getSuprafata() << "\n";
-    os << "Zona: " << santier.getZona() << "\n";
-    os << "Nume Utilaj: " << santier.getNumeUtilaj() << "\n";
+    os << santier.cost << " ";
+    os << santier.anulInceperii<<" ";
+    os << santier.getSuprafata() << " ";
+    os << santier.getZona() << " ";
+    os  << santier.getNumeUtilaj() << " ";
     return os;
 }
 
 ostream& operator<<(ostream& os, const Muncitori& muncitori) {
-    os << "Profesie: " << muncitori.getProfesie() << "\n";
-    os << "Nr. Angajati: " << muncitori.getNrAngajati() << "\n";
-    os << "Varste: ";
+    os << muncitori.getProfesie() << " ";
+    os << muncitori.getNrAngajati() << " ";
     int* varste = muncitori.getVarste();
     for (int i = 0; i < muncitori.getNrAngajati(); ++i) {
         os << varste[i] << " ";
     }
-    os << "\n";
     return os;
 }
 
 ostream& operator<<(ostream& os, const Utilaje& utilaje) {
-    os << "Tip Combustibil: " << utilaje.getTipCombustibil() << "\n";
-    os << "Nr. Utilaje: " << utilaje.getNrUtilaje() << "\n";
-    os << "Nume: " << utilaje.getNume() << "\n";
-    os << "Marci: ";
+    os << utilaje.getTipCombustibil() << " ";
+    os << utilaje.getNrUtilaje() << " ";
+    os << utilaje.getNume() << " ";
     string* marci = utilaje.getMarca();
     for (int i = 0; i < utilaje.getNrUtilaje(); ++i) {
         os << marci[i] << " ";
     }
-    os << "\n";
     return os;
 }
 
 class Echipament {
 private:
     int anFabricatie;
-    Utilaje* utilaj;  
+    Utilaje* utilaj;
     float costAchizitie;
     bool functional;
 
 public:
     Echipament() : anFabricatie(2020), costAchizitie(50000.0), functional(true), utilaj(new Utilaje()) {
-       
+
     }
 
     Echipament(int anFabricatie, const Utilaje& utilaj, float costAchizitie, bool functional) : anFabricatie(anFabricatie), costAchizitie(costAchizitie), functional(functional), utilaj(new Utilaje(utilaj)) {
-    
+
     }
 
     int getAnFabricatie() const { return anFabricatie; }
@@ -499,17 +592,37 @@ public:
     Echipament& operator=(const Echipament& echipament);
     bool operator==(const Echipament& echipament) const;
 
-    ~Echipament() {
-        delete utilaj;  
+    friend istream& operator>>(istream& fisier, Echipament& echipament) {
+        fisier >> echipament.anFabricatie;
+
+        fisier >> *(echipament.utilaj);
+
+        fisier >> echipament.costAchizitie;
+
+        fisier >> echipament.functional;
+
+        return fisier;
     }
+
+    ~Echipament() {
+        delete utilaj;
+    }
+
+    void scrieInFisierBinar(fstream& f) const {
+        f.write(reinterpret_cast<const char*>(&anFabricatie), sizeof(int));
+        utilaj->scrieInFisierBinar(f);
+        f.write(reinterpret_cast<const char*>(&costAchizitie), sizeof(float));
+        f.write(reinterpret_cast<const char*>(&functional), sizeof(bool));
+    }
+
 };
 
 
 ostream& operator<<(ostream& os, const Echipament& echipament) {
-    os << "An Fabricatie: " << echipament.getAnFabricatie() << "\n";
-    os << "Utilaj:\n" << *(echipament.getUtilaj());
-    os << "Cost Achizitie: " << echipament.getCostAchizitie() << "\n";
-    os << "Functional: " << (echipament.isFunctional() ? "Da" : "Nu") << "\n";
+    os << echipament.getAnFabricatie() << " ";
+    os << *(echipament.getUtilaj());
+    os << echipament.getCostAchizitie() << " ";
+    os  << (echipament.isFunctional() ? "Da" : "Nu") << " ";
     return os;
 }
 
@@ -534,7 +647,7 @@ bool Echipament::operator==(const Echipament& echipament) const {
 }
 
 void main() {
-    SANTIER santier1;
+    /*SANTIER santier1;
     char* numeUtilaj = new char[strlen("Excavator") + 1];
     strcpy_s(numeUtilaj, strlen("Excavator") + 1, "Excavator");
     SANTIER santier2(2015, 1200, "Constanta", numeUtilaj);
@@ -557,7 +670,7 @@ void main() {
     SANTIER santierSuma = santier1 + santier2;
     cout << "Suma Suprafetelor: " << santierSuma.getSuprafata() << endl;
 
-    int* varsteMuncitori = new int[3]; 
+    int* varsteMuncitori = new int[3];
     varsteMuncitori[0] = 28;
     varsteMuncitori[1] = 35;
     varsteMuncitori[2] = 42;
@@ -572,7 +685,7 @@ void main() {
     muncitori3 = muncitori2;
     cout << "Nr. Angajati Muncitori 3: " << muncitori3.getNrAngajati() << endl;
 
-    string* marciUtilaje = new string[2]; 
+    string* marciUtilaje = new string[2];
     marciUtilaje[0] = "Liebherr";
     marciUtilaje[1] = "Volvo";
     Utilaje utilaje1;
@@ -586,7 +699,7 @@ void main() {
     AdaugaMarcaUtilaj(utilaje1, "Caterpillar");
     cout << "Utilaje 1 dupa adaugare marca:\n" << utilaje1 << endl;
 
-    SANTIER* vectorSantier=new SANTIER[2];
+    SANTIER* vectorSantier = new SANTIER[2];
     for (int i = 0; i < 2; i++) {
         cout << "Introduceti datele pentru santier " << ":\n";
         cin >> vectorSantier[i];
@@ -651,6 +764,52 @@ void main() {
     }
     else {
         cout << "ECHIPAMENT 1 si ECHIPAMENT 2 nu sunt identice.\n";
-    }
+    }*/
 
+    /*SANTIER santier1;
+    ofstream a("SANTIER.txt", ios::app);
+    a << santier1;
+    a.close();
+    ifstream b("SANTIER.txt", ios::in);
+    b >> santier1;
+    cout << santier1;*/
+
+    /*Muncitori muncitori1;
+    ofstream c("Muncitori.txt", ios::app);
+    c << muncitori1;
+    c.close();
+    ifstream d("Muncitori.txt", ios::in);
+    d >> muncitori1;
+    cout << muncitori1 << endl;*/
+
+//Utilaje utilaje1;
+//ofstream g("Utilaje.txt", ios::app);
+//g << utilaje1;
+//g.close();
+//ifstream f("Utilaje.txt", ios::in);
+//f >> utilaje1;
+//cout << utilaje1 << endl;
+
+//Utilaje utilaje2;
+//Echipament echipament1(2018, utilaje2, 75000.0, true);
+//ofstream g("Echipament.txt", ios::app);
+//g << echipament1;
+//g.close();
+//ifstream f("Echipament.txt", ios::in);
+//f >> echipament1;
+//cout << echipament1 << endl;
+
+   /* SANTIER santier1;
+    Muncitori muncitori1;
+    Utilaje utilaje1;
+    Echipament echipament1;
+
+    fstream binaryFile("output.bin", ios::out | ios::binary);
+
+    if (binaryFile.is_open()) {
+        santier1.scrieInFisierBinar(binaryFile);
+        muncitori1.scrieInFisierBinar(binaryFile);
+        utilaje1.scrieInFisierBinar(binaryFile);
+        echipament1.scrieInFisierBinar(binaryFile);
+    }*/
 }
