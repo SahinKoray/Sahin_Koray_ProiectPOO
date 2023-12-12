@@ -617,6 +617,61 @@ public:
 
 };
 
+class Proiect : public SANTIER {
+private:
+    string tipProiect;
+
+public:
+    Proiect() : SANTIER(), tipProiect("Constructie cladirii") {}
+
+    Proiect(int anulInceperii, float suprafata, string zona, char* numeUtilaj, string tipProiect)
+        : SANTIER(anulInceperii, suprafata, zona, numeUtilaj), tipProiect(tipProiect) {}
+
+    Proiect(const Proiect& p) : SANTIER(p), tipProiect(p.tipProiect) {}
+
+    Proiect(const SANTIER& s) :SANTIER(s) {
+        this->tipProiect = "Constructie teren";
+    }
+
+    string getTipProiect() const { return tipProiect; }
+
+    void setTipProiect(const string& tipProiect) { this->tipProiect = tipProiect; }
+
+    friend ostream& operator<<(ostream& os, const Proiect& proiect);
+
+    ~Proiect() {}
+};
+
+ostream& operator<<(ostream& os, const Proiect& proiect) {
+    os << static_cast<const SANTIER&>(proiect) << " " << proiect.tipProiect << " ";
+    return os;
+}
+
+class Angajat : public Muncitori {
+private:
+    string numeAngajat;
+
+public:
+    Angajat() : Muncitori(), numeAngajat("Alex Popescu") {}
+
+    Angajat(string profesie, int nrAngajati, int* varste, string numeAngajat)
+        : Muncitori(profesie, nrAngajati, varste), numeAngajat(numeAngajat) {}
+
+    Angajat(const Angajat& a) : Muncitori(a), numeAngajat(a.numeAngajat) {}
+
+    string getNumeAngajat() const { return numeAngajat; }
+
+    void setNumeAngajat(const string& numeAngajat) { this->numeAngajat = numeAngajat; }
+
+    friend ostream& operator<<(ostream& os, const Angajat& angajat);
+
+    ~Angajat() {}
+};
+
+ostream& operator<<(ostream& os, const Angajat& angajat) {
+    os << static_cast<const Muncitori&>(angajat) << " " << angajat.numeAngajat << " ";
+    return os;
+}
 
 ostream& operator<<(ostream& os, const Echipament& echipament) {
     os << echipament.getAnFabricatie() << " ";
@@ -812,4 +867,19 @@ void main() {
         utilaje1.scrieInFisierBinar(binaryFile);
         echipament1.scrieInFisierBinar(binaryFile);
     }*/
+
+SANTIER s;
+
+Proiect proiect1; 
+Proiect proiect2(s); 
+
+int varste[] = { 25, 30, 28 };
+Angajat angajat1; 
+Angajat angajat2("Constructor", 3, varste, "Ion Ionescu"); 
+
+cout << "Proiect 1: " << proiect1 << endl;
+cout << "Proiect 2: " << proiect2 << endl;
+
+cout << "Angajat 1: " << angajat1 << endl;
+cout << "Angajat 2: " << angajat2 << endl;
 }
