@@ -2,43 +2,105 @@
 #include <fstream>
 using namespace std;
 
-class SANTIER {
+class Colectiv {
+private:
+    char* nationalitate;
+public: 
+    Colectiv() {
+        this->nationalitate = new char[strlen("Romana") + 1];
+        strcpy_s(this->nationalitate, strlen("Romana") + 1, "Romana");
+    }
+    Colectiv(char* nationalitate) {
+        this->nationalitate = new char[strlen(nationalitate) + 1];
+        strcpy_s(this->nationalitate, strlen(nationalitate) + 1, nationalitate);
+    }
+    Colectiv(const Colectiv& c) {
+        this->nationalitate = new char[strlen(c.nationalitate) + 1];
+        strcpy_s(this->nationalitate, strlen(c.nationalitate) + 1, c.nationalitate);
+    }
+    
+    virtual ~Colectiv() {
+        cout << "Apel destructor COLECTIV" << endl;
+        if(this->nationalitate!=NULL){
+            delete[]this->nationalitate;
+        }
+    }
+    virtual void calculeazaSalariulTotal() = 0;
+};
+
+class PlanDeLucru { //planul de a incepe un santier(nu am avut alte idei)
+private:
+    char* firma;//firma care a venit cu acest plan
+public:
+    PlanDeLucru() {
+        this->firma = new char[strlen("Arges") + 1];
+        strcpy_s(this->firma, strlen("Arges") + 1, "Arges");
+    }
+    PlanDeLucru(char* firma) {
+        this->firma = new char[strlen(firma) + 1];
+        strcpy_s(this->firma, strlen(firma) + 1, firma);
+    }
+    PlanDeLucru(const PlanDeLucru& c) {
+        this->firma = new char[strlen(c.firma) + 1];
+        strcpy_s(this->firma, strlen(c.firma) + 1, c.firma);
+    }
+
+    virtual ~PlanDeLucru() {
+        cout << "Apel destructor PlanDeLucru" << endl;
+        if (this->firma != NULL) {
+            delete[]this->firma;
+        }
+    }
+    virtual void afisareDetalii() = 0;
+};
+
+class SANTIER : public PlanDeLucru {
 private:
     static int cost;
     const int anulInceperii;
     float suprafata;
     string zona;
     char* numeUtilaj;
-
+    PlanDeLucru* plan;
 public:
-    SANTIER() : anulInceperii(2010) {
+
+    void afisareDetalii() {
+        cout << "Santier inceput in anul: " << this->getAnulInceperii() << " cu suprafata de " << this->getSuprafata() << " in zona " << this->getZona() << " cu utilajul principal de lucru " << this->getNumeUtilaj();
+    }
+    SANTIER() : PlanDeLucru(), plan(NULL),anulInceperii(2010) {
         this->suprafata = 799.5;
         this->zona = "Brasov";
         this->numeUtilaj = new char[strlen("Buldozer") + 1];
         strcpy_s(this->numeUtilaj, strlen("Buldozer") + 1, "Buldozer");
     }
 
-    SANTIER(int anulInceperii, float suprafata, string zona, char* numeUtilaj) : anulInceperii(anulInceperii), suprafata(suprafata), zona(zona) {
+    SANTIER(int anulInceperii, float suprafata, string zona, char* numeUtilaj,char* firma) : PlanDeLucru(firma), plan(NULL),anulInceperii(anulInceperii), suprafata(suprafata), zona(zona) {
         this->numeUtilaj = new char[strlen(numeUtilaj) + 1];
         strcpy_s(this->numeUtilaj, strlen(numeUtilaj) + 1, numeUtilaj);
     }
 
-    SANTIER(int anulInceperii, float suprafata) : anulInceperii(anulInceperii), suprafata(suprafata) {
+    SANTIER(int anulInceperii, float suprafata, char* firma) : PlanDeLucru(firma), plan(NULL), anulInceperii(anulInceperii), suprafata(suprafata) {
         this->zona = "Targoviste";
         this->numeUtilaj = new char[strlen("Tractor") + 1];
         strcpy_s(this->numeUtilaj, strlen("Tractor") + 1, "Tractor");
     }
 
-    SANTIER(const SANTIER& s) : anulInceperii(s.anulInceperii), suprafata(s.suprafata), zona(s.zona) {
+    SANTIER(const SANTIER& s) : anulInceperii(s.anulInceperii), suprafata(s.suprafata), zona(s.zona), plan(NULL) {
         this->numeUtilaj = new char[strlen(s.numeUtilaj) + 1];
         strcpy_s(this->numeUtilaj, strlen(s.numeUtilaj) + 1, s.numeUtilaj);
     }
 
+    PlanDeLucru* getPlan() const {
+        return plan;
+    }
     int getAnulInceperii() const { return anulInceperii; }
     float getSuprafata() const { return suprafata; }
     string getZona() const { return zona; }
     char* getNumeUtilaj() const { return numeUtilaj; }
 
+    void setPlan(PlanDeLucru* p) {
+        plan = p;
+    }
     void setSuprafata(float suprafata) { this->suprafata = suprafata; }
     void setZona(const string& zona) { this->zona = zona; }
     void setNumeUtilaj(const char* numeUtilaj) {
@@ -67,7 +129,7 @@ public:
     }*/
 
     friend istream& operator>>(istream& fisier, SANTIER& santier) {
-        int a,b;
+        int a, b;
         fisier >> a;
         fisier >> b;
         fisier >> santier.suprafata;
@@ -141,30 +203,32 @@ public:
 
 int SANTIER::cost = 100000;
 
-class Muncitori {
+class Muncitori : public Colectiv {
 private:
     const string profesie;
     static float salariuInceput;
     int nrAngajati;
     int* varste;
+    Colectiv* colectiv;
 
 public:
-    Muncitori() : profesie("Inginerii") {
-        this->nrAngajati = 3;
-        this->varste = new int[this->nrAngajati];
-        this->varste[0] = 32;
-        this->varste[1] = 29;
-        this->varste[2] = 46;
+
+    void calculeazaSalariulTotal() {
+        cout << salariuInceput * nrAngajati;
+    }
+    Muncitori() :Colectiv(),colectiv(NULL) {
+        
     }
 
-    Muncitori(string profesie, int nrAngajati, int* varste) : profesie(profesie), nrAngajati(nrAngajati) {
+    Muncitori(string profesie, int nrAngajati, int* varste,char* nationalitate) : Colectiv(nationalitate) , profesie(profesie), colectiv(NULL) {
+        this->nrAngajati = nrAngajati;
         this->varste = new int[nrAngajati];
         for (int i = 0; i < nrAngajati; i++) {
             this->varste[i] = varste[i];
         }
     }
 
-    Muncitori(string profesie) : profesie(profesie), nrAngajati(0) {
+    Muncitori(string profesie,char* nationalitate) : Colectiv(nationalitate),profesie(profesie), nrAngajati(nrAngajati), colectiv(NULL) {
         this->varste = new int[this->nrAngajati];
         for (int i = 0; i < this->nrAngajati; i++)
         {
@@ -172,7 +236,7 @@ public:
         }
     }
 
-    Muncitori(const Muncitori& m) : profesie(m.profesie), nrAngajati(m.nrAngajati) {
+    Muncitori(const Muncitori& m) : profesie(m.profesie), nrAngajati(m.nrAngajati), colectiv(NULL) {
         if (nrAngajati > 0) {
             varste = new int[nrAngajati];
             for (int i = 0; i < nrAngajati; i++) {
@@ -184,11 +248,17 @@ public:
         }
     }
 
+    Colectiv* getColectiv() const {
+        return colectiv;
+    }
     string getProfesie() const { return profesie; }
     float getSalariuInceput() const { return salariuInceput; }
     int getNrAngajati() const { return nrAngajati; }
     int* getVarste() const { return varste; }
 
+    void setColectiv(Colectiv* c) {
+        colectiv = c;
+    }
     void setNrAngajati(int nrAngajati) { this->nrAngajati = nrAngajati; }
     void setVarste(const int* varste) {
         if (this->varste) delete[] this->varste;
@@ -236,6 +306,7 @@ public:
     }
 
     ~Muncitori() {
+        if(varste!=NULL)
         delete[] varste;
     }
 
@@ -533,10 +604,10 @@ void AdaugaMarcaUtilaj(Utilaje& utilaje, const string& marcaNoua) {
 
 ostream& operator<<(ostream& os, const SANTIER& santier) {
     os << santier.cost << " ";
-    os << santier.anulInceperii<<" ";
+    os << santier.anulInceperii << " ";
     os << santier.getSuprafata() << " ";
     os << santier.getZona() << " ";
-    os  << santier.getNumeUtilaj() << " ";
+    os << santier.getNumeUtilaj() << " ";
     return os;
 }
 
@@ -617,15 +688,15 @@ public:
 
 };
 
-class Proiect : public SANTIER {
+class Proiect : public SANTIER { //un santier desfasoara un proiect
 private:
     string tipProiect;
 
 public:
     Proiect() : SANTIER(), tipProiect("Constructie cladirii") {}
 
-    Proiect(int anulInceperii, float suprafata, string zona, char* numeUtilaj, string tipProiect)
-        : SANTIER(anulInceperii, suprafata, zona, numeUtilaj), tipProiect(tipProiect) {}
+    Proiect(int anulInceperii, float suprafata, string zona, char* numeUtilaj,char* firma, string tipProiect)
+        : SANTIER(anulInceperii, suprafata, zona, numeUtilaj,firma), tipProiect(tipProiect) {}
 
     Proiect(const Proiect& p) : SANTIER(p), tipProiect(p.tipProiect) {}
 
@@ -654,8 +725,8 @@ private:
 public:
     Angajat() : Muncitori(), numeAngajat("Alex Popescu") {}
 
-    Angajat(string profesie, int nrAngajati, int* varste, string numeAngajat)
-        : Muncitori(profesie, nrAngajati, varste), numeAngajat(numeAngajat) {}
+    Angajat(string profesie, int nrAngajati, int* varste, char* nationalitate, string numeAngajat)
+        : Muncitori(profesie, nrAngajati, varste, nationalitate), numeAngajat(numeAngajat) {}
 
     Angajat(const Angajat& a) : Muncitori(a), numeAngajat(a.numeAngajat) {}
 
@@ -677,7 +748,7 @@ ostream& operator<<(ostream& os, const Echipament& echipament) {
     os << echipament.getAnFabricatie() << " ";
     os << *(echipament.getUtilaj());
     os << echipament.getCostAchizitie() << " ";
-    os  << (echipament.isFunctional() ? "Da" : "Nu") << " ";
+    os << (echipament.isFunctional() ? "Da" : "Nu") << " ";
     return os;
 }
 
@@ -837,49 +908,110 @@ void main() {
     d >> muncitori1;
     cout << muncitori1 << endl;*/
 
-//Utilaje utilaje1;
-//ofstream g("Utilaje.txt", ios::app);
-//g << utilaje1;
-//g.close();
-//ifstream f("Utilaje.txt", ios::in);
-//f >> utilaje1;
-//cout << utilaje1 << endl;
+    //Utilaje utilaje1;
+    //ofstream g("Utilaje.txt", ios::app);
+    //g << utilaje1;
+    //g.close();
+    //ifstream f("Utilaje.txt", ios::in);
+    //f >> utilaje1;
+    //cout << utilaje1 << endl;
 
-//Utilaje utilaje2;
-//Echipament echipament1(2018, utilaje2, 75000.0, true);
-//ofstream g("Echipament.txt", ios::app);
-//g << echipament1;
-//g.close();
-//ifstream f("Echipament.txt", ios::in);
-//f >> echipament1;
-//cout << echipament1 << endl;
+    //Utilaje utilaje2;
+    //Echipament echipament1(2018, utilaje2, 75000.0, true);
+    //ofstream g("Echipament.txt", ios::app);
+    //g << echipament1;
+    //g.close();
+    //ifstream f("Echipament.txt", ios::in);
+    //f >> echipament1;
+    //cout << echipament1 << endl;
 
-   /* SANTIER santier1;
-    Muncitori muncitori1;
-    Utilaje utilaje1;
-    Echipament echipament1;
+       /* SANTIER santier1;
+        Muncitori muncitori1;
+        Utilaje utilaje1;
+        Echipament echipament1;
 
-    fstream binaryFile("output.bin", ios::out | ios::binary);
+        fstream binaryFile("output.bin", ios::out | ios::binary);
 
-    if (binaryFile.is_open()) {
-        santier1.scrieInFisierBinar(binaryFile);
-        muncitori1.scrieInFisierBinar(binaryFile);
-        utilaje1.scrieInFisierBinar(binaryFile);
-        echipament1.scrieInFisierBinar(binaryFile);
-    }*/
+        if (binaryFile.is_open()) {
+            santier1.scrieInFisierBinar(binaryFile);
+            muncitori1.scrieInFisierBinar(binaryFile);
+            utilaje1.scrieInFisierBinar(binaryFile);
+            echipament1.scrieInFisierBinar(binaryFile);
+        }*/
 
-SANTIER s;
+    /*SANTIER s;
 
-Proiect proiect1; 
-Proiect proiect2(s); 
+    Proiect proiect1;
+    Proiect proiect2(s);
 
-int varste[] = { 25, 30, 28 };
-Angajat angajat1; 
-Angajat angajat2("Constructor", 3, varste, "Ion Ionescu"); 
+    int varste[] = { 25, 30, 28 };
+    Angajat angajat1;
+    Angajat angajat2("Constructor", 3, varste, "Ion Ionescu");
 
-cout << "Proiect 1: " << proiect1 << endl;
-cout << "Proiect 2: " << proiect2 << endl;
+    cout << "Proiect 1: " << proiect1 << endl;
+    cout << "Proiect 2: " << proiect2 << endl;
 
-cout << "Angajat 1: " << angajat1 << endl;
-cout << "Angajat 2: " << angajat2 << endl;
+    cout << "Angajat 1: " << angajat1 << endl;
+    cout << "Angajat 2: " << angajat2 << endl;*/
+
+//Colectiv* c = new Muncitori();
+//c->calculeazaSalariulTotal();
+//
+//PlanDeLucru* j = new SANTIER();
+//j->afisareDetalii();
+
+//const int numarElemente = 10;
+//Colectiv* vectorColectiv[numarElemente];
+//
+//char* nationalitate = new char[strlen("Turca") + 1];
+//strcpy_s(nationalitate, strlen("Turca") + 1, "Turca");
+//int* varste = new int[3];
+//varste[0] = 23;
+//varste[1] = 41;
+//varste[2] = 29;
+//
+//for (int i = 0; i < numarElemente; i+=2) {
+//    vectorColectiv[i] = new Muncitori();
+//    vectorColectiv[i + 1] = new Muncitori("Constructori", 3, varste, nationalitate);
+//}
+//
+//
+//for (int i = 0; i < numarElemente; i++) {
+//    vectorColectiv[i]->calculeazaSalariulTotal();  
+//    cout << endl;
+//}
+//
+//for (int i = 0; i < numarElemente; i++) {
+//    delete vectorColectiv[i];
+//}
+//
+//delete[] nationalitate;
+//delete[] varste;
+
+const int numarElemente = 10;
+PlanDeLucru* vectorPlan[numarElemente];
+
+char* numeUtilaj = new char[strlen("Buldozer") + 1];
+strcpy_s(numeUtilaj, strlen("Buldozer") + 1, "Turca");
+char* firma = new char[strlen("Construct SRL") + 1];
+strcpy_s(firma, strlen("Construct SRL") + 1, "Construct SRL");
+
+for (int i = 0; i < numarElemente; i+=2) {
+    vectorPlan[i] = new SANTIER();
+    vectorPlan[i + 1] = new SANTIER(2020,930,"Pitesti", numeUtilaj, firma);
+}
+
+
+for (int i = 0; i < numarElemente; i++) {
+    vectorPlan[i]->afisareDetalii();
+    cout << endl;
+}
+
+for (int i = 0; i < numarElemente; i++) {
+    delete vectorPlan[i];
+}
+
+delete[] numeUtilaj;
+delete[] firma;
+
 }
